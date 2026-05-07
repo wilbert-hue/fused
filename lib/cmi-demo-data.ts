@@ -68,6 +68,7 @@ const EMAIL_DOMAIN = 'example.com'
 function isPlaceholder(s: string): boolean {
   const t = s.trim().toLowerCase()
   if (!t) return true
+  if (/^customer\s*xx\s*$/i.test(s.trim())) return true
   return (
     t === 'x' ||
     t === 'xx' ||
@@ -90,6 +91,12 @@ function substitute(
   const s = String(value).trim()
   const hint = (hintRaw || '').toLowerCase()
 
+  /** S.No. is always column 0; handle before `return s` so literals like 60 / "Demo 34-1" are not kept */
+  if (colIdx === 0) {
+    if (/^\d+$/.test(s)) return parseInt(s, 10)
+    return rowIdx + 1
+  }
+
   const customerMatch = /^customer\s*(\d+)\s*$/i.exec(s)
   if (customerMatch) {
     const n = Math.max(0, parseInt(customerMatch[1], 10) - 1)
@@ -97,8 +104,6 @@ function substitute(
   }
 
   if (!isPlaceholder(s) && s.length > 0) return s
-
-  if (colIdx === 0 && /^\d+$/.test(s)) return parseInt(s, 10)
 
   if (hint.includes('company name') || hint.includes('parent company')) {
     return COMPANIES[rowIdx % COMPANIES.length]

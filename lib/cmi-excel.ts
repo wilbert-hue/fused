@@ -242,19 +242,12 @@ function normalizeBody(
   return out
 }
 
-function isSerialNumberHint(hint: string): boolean {
-  const t = hint.toLowerCase().replace(/\s/g, '')
-  return t.includes('s.no') || t.includes('serialno')
-}
-
-/** After slicing rows, make S.No. column 1…n so gaps from the workbook do not show. */
-function renumberSnoColumn(
-  rows: (string | number)[][],
-  columnHints: string[]
-): (string | number)[][] {
-  if (rows.length === 0 || !isSerialNumberHint(columnHints[0] ?? '')) {
-    return rows
-  }
+/**
+ * CMI sheets always use column 0 for S.No.; merged header cells often leave row5/6 hints
+ * empty for that column, so we always renumber after the row cap (1…n).
+ */
+function renumberSnoColumn(rows: (string | number)[][]): (string | number)[][] {
+  if (rows.length === 0) return rows
   return rows.map((row, ri) => {
     const next = row.slice()
     if (next.length > 0) next[0] = ri + 1
@@ -288,8 +281,7 @@ function parseOneSheet(sheetName: string, sh: XLSX.WorkSheet): CmiSheetModel {
     applyDemoBodyRows(
       normalizeBody(grid as unknown[][], maxCol, DATA_START),
       columnHints
-    ).slice(0, MAX_CMI_BODY_ROWS),
-    columnHints
+    ).slice(0, MAX_CMI_BODY_ROWS)
   )
 
   return {
