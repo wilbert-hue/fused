@@ -1,8 +1,8 @@
 import fs from 'fs/promises'
 import path from 'path'
 import Image from 'next/image'
-import { ChevronDown } from 'lucide-react'
 import {
+  filterCmiSheetsProposition3Only,
   getCmiExcelFilename,
   parseCmiWorkbookFromBuffer,
   type CmiHeaderCell,
@@ -39,22 +39,15 @@ function headerCellClass(cell: CmiHeaderCell): string {
   return `${base} bg-[#e8f5e9] text-xs font-semibold`
 }
 
-function CmiPropositionBlock({ sheet }: { sheet: CmiSheetModel }) {
+function CmiSingleTable({ sheet }: { sheet: CmiSheetModel }) {
   const hasTable =
     sheet.headerRows.length > 0 && sheet.columnCount > 0
 
   return (
-    <details
-      open
-      className="group rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden"
-    >
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 bg-white border-b border-gray-200 hover:bg-gray-50 [&::-webkit-details-marker]:hidden">
-        <span className="text-base font-semibold text-gray-900">
-          {sheet.displayTitle}
-        </span>
-        <ChevronDown className="h-5 w-5 shrink-0 text-gray-600 transition-transform group-open:rotate-180" />
-      </summary>
-
+    <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
+      <h2 className="text-base font-semibold text-gray-900 px-4 py-3 border-b border-gray-200 bg-white">
+        {sheet.displayTitle}
+      </h2>
       <div className="p-3 sm:p-4 bg-gray-100">
         {!hasTable ? (
           <p className="text-sm text-gray-600">No table structure in this sheet.</p>
@@ -77,52 +70,52 @@ function CmiPropositionBlock({ sheet }: { sheet: CmiSheetModel }) {
                 </div>
               ) : null}
 
-            <table
-              className={`w-full min-w-max border-collapse border border-black text-sm text-gray-900 ${
-                sheet.headerStripTitle ? 'border-t-0' : ''
-              }`}
-            >
-              <thead>
-                {sheet.headerRows.map((row, ri) => (
-                  <tr key={ri}>
-                    {row.cells.map((cell, ci) => (
-                      <th
-                        key={`${ri}-${ci}`}
-                        scope="col"
-                        rowSpan={cell.rowSpan > 1 ? cell.rowSpan : undefined}
-                        colSpan={cell.colSpan > 1 ? cell.colSpan : undefined}
-                        className={headerCellClass(cell)}
-                      >
-                        {cell.text || '\u00a0'}
-                      </th>
-                    ))}
-                  </tr>
-                ))}
-              </thead>
-              <tbody>
-                {sheet.bodyRows.map((row, ri) => (
-                  <tr key={ri}>
-                    {Array.from({ length: sheet.columnCount }, (_, ci) => (
-                      <td
-                        key={ci}
-                        className="border border-black px-2 py-1.5 whitespace-nowrap bg-white"
-                      >
-                        {row[ci] === '' || row[ci] == null ? (
-                          <span className="text-gray-500">—</span>
-                        ) : (
-                          String(row[ci])
-                        )}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+              <table
+                className={`w-full min-w-max border-collapse border border-black text-sm text-gray-900 ${
+                  sheet.headerStripTitle ? 'border-t-0' : ''
+                }`}
+              >
+                <thead>
+                  {sheet.headerRows.map((row, ri) => (
+                    <tr key={ri}>
+                      {row.cells.map((cell, ci) => (
+                        <th
+                          key={`${ri}-${ci}`}
+                          scope="col"
+                          rowSpan={cell.rowSpan > 1 ? cell.rowSpan : undefined}
+                          colSpan={cell.colSpan > 1 ? cell.colSpan : undefined}
+                          className={headerCellClass(cell)}
+                        >
+                          {cell.text || '\u00a0'}
+                        </th>
+                      ))}
+                    </tr>
+                  ))}
+                </thead>
+                <tbody>
+                  {sheet.bodyRows.map((row, ri) => (
+                    <tr key={ri}>
+                      {Array.from({ length: sheet.columnCount }, (_, ci) => (
+                        <td
+                          key={ci}
+                          className="border border-black px-2 py-1.5 whitespace-nowrap bg-white"
+                        >
+                          {row[ci] === '' || row[ci] == null ? (
+                            <span className="text-gray-500">—</span>
+                          ) : (
+                            String(row[ci])
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         )}
       </div>
-    </details>
+    </div>
   )
 }
 
@@ -133,7 +126,7 @@ export default async function DashboardPage() {
 
   try {
     const buf = await fs.readFile(filePath)
-    sheets = parseCmiWorkbookFromBuffer(buf)
+    sheets = filterCmiSheetsProposition3Only(parseCmiWorkbookFromBuffer(buf))
   } catch (e) {
     loadError =
       e instanceof Error ? e.message : 'Could not read the CMI Excel file.'
@@ -211,7 +204,7 @@ export default async function DashboardPage() {
                         Customer Intelligence
                       </div>
                       <p className="mt-1 text-xs text-sky-900/85 leading-snug">
-                        Customer database with proposition tables.
+                        Proposition 3 buyer database (single table).
                       </p>
                     </div>
                   </div>
@@ -222,10 +215,14 @@ export default async function DashboardPage() {
             <main className="lg:col-span-9 space-y-6 min-w-0 w-full">
               <PageTitleAndDemoNote />
               {sheets.length === 0 ? (
-                <p className="text-gray-600">No proposition sheets found.</p>
+                <p className="text-gray-600">
+                  No Preposition 3 / Proposition 3 sheet found. Add a worksheet
+                  whose name includes that tab (e.g. &quot;Preposition 3&quot;)
+                  in the CMI Excel file.
+                </p>
               ) : (
                 sheets.map((sheet) => (
-                  <CmiPropositionBlock key={sheet.sheetName} sheet={sheet} />
+                  <CmiSingleTable key={sheet.sheetName} sheet={sheet} />
                 ))
               )}
             </main>

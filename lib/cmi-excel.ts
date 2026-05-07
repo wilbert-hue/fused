@@ -331,6 +331,17 @@ export function parseCmiWorkbookFromBuffer(buf: Buffer): CmiSheetModel[] {
   })
 }
 
+/** Keep only the Proposition / Preposition 3 worksheet (excludes …30+, etc.). */
+export function filterCmiSheetsProposition3Only(
+  sheets: CmiSheetModel[]
+): CmiSheetModel[] {
+  const isP3 = (label: string) =>
+    /pr[eo]position\s*3(?!\d)/i.test(label.trim())
+  return sheets.filter(
+    (s) => isP3(s.sheetName) || isP3(s.displayTitle)
+  )
+}
+
 export function getCmiExcelFilename(): string {
   return CMI_FILENAME
 }
