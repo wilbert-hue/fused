@@ -331,14 +331,14 @@ export function parseCmiWorkbookFromBuffer(buf: Buffer): CmiSheetModel[] {
   })
 }
 
-/** Keep only the Proposition / Preposition 3 worksheet (excludes …30+, etc.). */
-export function filterCmiSheetsProposition3Only(
+/** Keep only the Proposition / Preposition 1 worksheet (excludes …10+, etc.). */
+export function filterCmiSheetsProposition1Only(
   sheets: CmiSheetModel[]
 ): CmiSheetModel[] {
-  const isP3 = (label: string) =>
-    /pr[eo]position\s*3(?!\d)/i.test(label.trim())
+  const isP1 = (label: string) =>
+    /pr[eo]position\s*1(?!\d)/i.test(label.trim())
   return sheets.filter(
-    (s) => isP3(s.sheetName) || isP3(s.displayTitle)
+    (s) => isP1(s.sheetName) || isP1(s.displayTitle)
   )
 }
 

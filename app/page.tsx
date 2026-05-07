@@ -2,7 +2,7 @@ import fs from 'fs/promises'
 import path from 'path'
 import Image from 'next/image'
 import {
-  filterCmiSheetsProposition3Only,
+  filterCmiSheetsProposition1Only,
   getCmiExcelFilename,
   parseCmiWorkbookFromBuffer,
   type CmiHeaderCell,
@@ -132,7 +132,7 @@ export default async function DashboardPage() {
 
   try {
     const buf = await fs.readFile(filePath)
-    sheets = filterCmiSheetsProposition3Only(parseCmiWorkbookFromBuffer(buf))
+    sheets = filterCmiSheetsProposition1Only(parseCmiWorkbookFromBuffer(buf))
   } catch (e) {
     loadError =
       e instanceof Error ? e.message : 'Could not read the CMI Excel file.'
@@ -208,7 +208,7 @@ export default async function DashboardPage() {
                       Customer Intelligence
                     </div>
                     <p className="mt-1 text-xs text-sky-900/85 leading-snug">
-                      Proposition 3 buyer database (single table, full width).
+                      Proposition 1 buyer database (single table, full width).
                     </p>
                   </div>
                 </div>
@@ -219,8 +219,8 @@ export default async function DashboardPage() {
               <PageTitleAndDemoNote />
               {sheets.length === 0 ? (
                 <p className="text-gray-600">
-                  No Preposition 3 / Proposition 3 sheet found. Add a worksheet
-                  whose name includes that tab (e.g. &quot;Preposition 3&quot;)
+                  No Preposition 1 / Proposition 1 sheet found. Add a worksheet
+                  whose name includes that tab (e.g. &quot;Preposition 1&quot;)
                   in the CMI Excel file.
                 </p>
               ) : (
