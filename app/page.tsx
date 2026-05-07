@@ -32,8 +32,9 @@ function PageTitleAndDemoNote() {
 
 function headerCellClass(cell: CmiHeaderCell): string {
   const base =
-    'border border-black px-2 py-2 text-center align-middle text-gray-900 leading-snug'
-  if (cell.variant === 'sno') return `${base} bg-[#f9e79f] font-semibold`
+    'border border-black px-3 py-2 text-center align-middle text-gray-900 leading-snug whitespace-normal break-words [overflow-wrap:anywhere] min-w-[10rem] max-w-[22rem]'
+  if (cell.variant === 'sno')
+    return `${base} bg-[#f9e79f] font-semibold min-w-[3rem] max-w-[4.5rem]`
   if (cell.variant === 'leaf')
     return `${base} bg-[#e8f5e9] text-xs font-semibold`
   return `${base} bg-[#e8f5e9] text-xs font-semibold`
@@ -52,26 +53,26 @@ function CmiSingleTable({ sheet }: { sheet: CmiSheetModel }) {
         {!hasTable ? (
           <p className="text-sm text-gray-600">No table structure in this sheet.</p>
         ) : (
-          <div className="w-full overflow-x-auto rounded-md border border-gray-300 bg-white">
+          <div className="w-full overflow-x-auto rounded-md border border-gray-300 bg-white [scrollbar-gutter:stable]">
             <div className="flex w-full min-w-0 flex-col">
               <div className="shrink-0 bg-[#2c3e50] px-4 py-3 text-right text-white w-full">
-                <div className="text-sm font-semibold leading-tight">
+                <div className="text-sm font-semibold leading-tight whitespace-normal [overflow-wrap:anywhere]">
                   {sheet.banner.title}
                 </div>
                 {sheet.banner.subtitle ? (
-                  <div className="mt-1 text-xs leading-snug text-white/90">
+                  <div className="mt-1 text-xs leading-snug text-white/90 whitespace-normal [overflow-wrap:anywhere]">
                     {sheet.banner.subtitle}
                   </div>
                 ) : null}
               </div>
               {sheet.headerStripTitle ? (
-                <div className="shrink-0 w-full border-x border-b border-black bg-[#e8f5e9] px-4 py-2 text-right text-sm font-semibold text-gray-900">
+                <div className="shrink-0 w-full border-x border-b border-black bg-[#e8f5e9] px-4 py-2 text-right text-sm font-semibold text-gray-900 whitespace-normal [overflow-wrap:anywhere]">
                   {sheet.headerStripTitle}
                 </div>
               ) : null}
 
               <table
-                className={`w-full min-w-max border-collapse border border-black text-sm text-gray-900 ${
+                className={`w-full min-w-max table-auto border-collapse border border-black text-sm text-gray-900 ${
                   sheet.headerStripTitle ? 'border-t-0' : ''
                 }`}
               >
@@ -98,7 +99,9 @@ function CmiSingleTable({ sheet }: { sheet: CmiSheetModel }) {
                       {Array.from({ length: sheet.columnCount }, (_, ci) => (
                         <td
                           key={ci}
-                          className="border border-black px-2 py-1.5 whitespace-nowrap bg-white"
+                          className={`border border-black px-3 py-2 align-top bg-white text-gray-900 whitespace-normal break-words [overflow-wrap:anywhere] min-w-[10rem] max-w-[22rem] ${
+                            ci === 0 ? 'min-w-[3rem] max-w-[4rem] text-center' : ''
+                          }`}
                         >
                           {row[ci] === '' || row[ci] == null ? (
                             <span className="text-gray-500">—</span>
@@ -141,7 +144,7 @@ export default async function DashboardPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Top bar — logo left, titles centered (Coherent-style) */}
       <header className="bg-white border-b border-gray-200">
-        <div className="container mx-auto flex max-w-[1800px] items-center gap-4 px-4 py-5">
+        <div className="mx-auto flex w-full max-w-[2000px] items-center gap-4 px-4 sm:px-6 py-5">
           <div className="flex w-[clamp(140px,26vw,200px)] shrink-0 justify-start">
             <Image
               src="/logo.png"
@@ -167,7 +170,7 @@ export default async function DashboardPage() {
         </div>
       </header>
 
-      <div className="container mx-auto max-w-[1800px] px-4 py-6">
+      <div className="mx-auto w-full max-w-[2000px] px-4 sm:px-6 py-6">
         {loadError ? (
           <div>
             <PageTitleAndDemoNote />
@@ -187,32 +190,29 @@ export default async function DashboardPage() {
           </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-            {/* Sidebar — chart view */}
-            <aside className="lg:col-span-3">
-              <div className="sticky top-6 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-                <h2 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">
-                  Chart view
-                </h2>
-                <div className="rounded-lg border border-sky-200 border-l-[6px] border-l-teal-600 bg-sky-50/90 p-3 shadow-sm">
-                  <div className="flex items-start gap-2">
-                    <span className="text-lg" aria-hidden>
-                      👤
-                    </span>
-                    <div>
-                      <div className="text-sm font-semibold text-sky-950">
-                        Customer Intelligence
-                      </div>
-                      <p className="mt-1 text-xs text-sky-900/85 leading-snug">
-                        Proposition 3 buyer database (single table).
-                      </p>
+          <div className="flex flex-col gap-6">
+            <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">
+                Chart view
+              </h2>
+              <div className="rounded-lg border border-sky-200 border-l-[6px] border-l-teal-600 bg-sky-50/90 p-3 shadow-sm max-w-xl">
+                <div className="flex items-start gap-2">
+                  <span className="text-lg" aria-hidden>
+                    👤
+                  </span>
+                  <div>
+                    <div className="text-sm font-semibold text-sky-950">
+                      Customer Intelligence
                     </div>
+                    <p className="mt-1 text-xs text-sky-900/85 leading-snug">
+                      Proposition 3 buyer database (single table, full width).
+                    </p>
                   </div>
                 </div>
               </div>
-            </aside>
+            </div>
 
-            <main className="lg:col-span-9 space-y-6 min-w-0 w-full">
+            <main className="space-y-6 min-w-0 w-full">
               <PageTitleAndDemoNote />
               {sheets.length === 0 ? (
                 <p className="text-gray-600">
