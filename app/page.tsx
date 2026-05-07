@@ -31,13 +31,22 @@ function PageTitleAndDemoNote() {
 }
 
 function headerCellClass(cell: CmiHeaderCell): string {
-  const base =
-    'border border-black px-3 py-2 text-center align-middle text-gray-900 leading-snug whitespace-normal break-words [overflow-wrap:anywhere] min-w-[10rem] max-w-[22rem]'
+  const wrap =
+    'border border-black px-3 py-2 text-center align-middle text-gray-900 leading-snug whitespace-normal break-words [overflow-wrap:anywhere]'
   if (cell.variant === 'sno')
-    return `${base} bg-[#f9e79f] font-semibold min-w-[3rem] max-w-[4.5rem]`
+    return `${wrap} bg-[#f9e79f] font-semibold whitespace-nowrap min-w-[3.25rem] w-14 px-2`
   if (cell.variant === 'leaf')
-    return `${base} bg-[#e8f5e9] text-xs font-semibold`
-  return `${base} bg-[#e8f5e9] text-xs font-semibold`
+    return `${wrap} bg-[#e8f5e9] text-xs font-semibold min-w-[12rem]`
+  return `${wrap} bg-[#e8f5e9] text-xs font-semibold min-w-[12rem]`
+}
+
+function bodyCellClass(columnIndex: number): string {
+  const base =
+    'border border-black px-3 py-2 align-top bg-white text-gray-900 break-words [overflow-wrap:anywhere]'
+  if (columnIndex === 0) {
+    return `${base} w-14 min-w-[3.25rem] max-w-[4rem] text-center tabular-nums whitespace-nowrap`
+  }
+  return `${base} min-w-[12rem] whitespace-normal`
 }
 
 function CmiSingleTable({ sheet }: { sheet: CmiSheetModel }) {
@@ -45,7 +54,7 @@ function CmiSingleTable({ sheet }: { sheet: CmiSheetModel }) {
     sheet.headerRows.length > 0 && sheet.columnCount > 0
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
+    <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
       <h2 className="text-base font-semibold text-gray-900 px-4 py-3 border-b border-gray-200 bg-white">
         {sheet.displayTitle}
       </h2>
@@ -53,27 +62,26 @@ function CmiSingleTable({ sheet }: { sheet: CmiSheetModel }) {
         {!hasTable ? (
           <p className="text-sm text-gray-600">No table structure in this sheet.</p>
         ) : (
-          <div className="w-full overflow-x-auto rounded-md border border-gray-300 bg-white [scrollbar-gutter:stable]">
-            <div className="flex w-full min-w-0 flex-col">
-              <div className="shrink-0 bg-[#2c3e50] px-4 py-3 text-right text-white w-full">
-                <div className="text-sm font-semibold leading-tight whitespace-normal [overflow-wrap:anywhere]">
-                  {sheet.banner.title}
-                </div>
-                {sheet.banner.subtitle ? (
-                  <div className="mt-1 text-xs leading-snug text-white/90 whitespace-normal [overflow-wrap:anywhere]">
-                    {sheet.banner.subtitle}
-                  </div>
-                ) : null}
+          <div className="rounded-md border border-gray-300 bg-white">
+            <div className="shrink-0 bg-[#2c3e50] px-4 py-3 text-right text-white w-full">
+              <div className="text-sm font-semibold leading-tight whitespace-normal [overflow-wrap:anywhere]">
+                {sheet.banner.title}
               </div>
-              {sheet.headerStripTitle ? (
-                <div className="shrink-0 w-full border-x border-b border-black bg-[#e8f5e9] px-4 py-2 text-right text-sm font-semibold text-gray-900 whitespace-normal [overflow-wrap:anywhere]">
-                  {sheet.headerStripTitle}
+              {sheet.banner.subtitle ? (
+                <div className="mt-1 text-xs leading-snug text-white/90 whitespace-normal [overflow-wrap:anywhere]">
+                  {sheet.banner.subtitle}
                 </div>
               ) : null}
-
+            </div>
+            {sheet.headerStripTitle ? (
+              <div className="shrink-0 w-full border-x border-b border-black bg-[#e8f5e9] px-4 py-2 text-right text-sm font-semibold text-gray-900 whitespace-normal [overflow-wrap:anywhere]">
+                {sheet.headerStripTitle}
+              </div>
+            ) : null}
+            <div className="w-full overflow-x-auto overscroll-x-contain [scrollbar-gutter:stable]">
               <table
-                className={`w-full min-w-max table-auto border-collapse border border-black text-sm text-gray-900 ${
-                  sheet.headerStripTitle ? 'border-t-0' : ''
+                className={`w-max border-collapse border-l border-r border-b border-black text-sm text-gray-900 ${
+                  sheet.headerStripTitle ? '' : 'border-t border-black'
                 }`}
               >
                 <thead>
@@ -97,12 +105,7 @@ function CmiSingleTable({ sheet }: { sheet: CmiSheetModel }) {
                   {sheet.bodyRows.map((row, ri) => (
                     <tr key={ri}>
                       {Array.from({ length: sheet.columnCount }, (_, ci) => (
-                        <td
-                          key={ci}
-                          className={`border border-black px-3 py-2 align-top bg-white text-gray-900 whitespace-normal break-words [overflow-wrap:anywhere] min-w-[10rem] max-w-[22rem] ${
-                            ci === 0 ? 'min-w-[3rem] max-w-[4rem] text-center' : ''
-                          }`}
-                        >
+                        <td key={ci} className={bodyCellClass(ci)}>
                           {row[ci] === '' || row[ci] == null ? (
                             <span className="text-gray-500">—</span>
                           ) : (
