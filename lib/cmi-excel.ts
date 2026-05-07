@@ -255,6 +255,21 @@ function renumberSnoColumn(rows: (string | number)[][]): (string | number)[][] {
   })
 }
 
+/** Ensure exactly `targetRows` lines when the workbook has fewer populated body rows. */
+function padBodyRowTemplates(
+  rows: (string | number)[][],
+  maxCol: number,
+  targetRows: number
+): (string | number)[][] {
+  const capped = rows.slice(0, targetRows)
+  if (capped.length >= targetRows || maxCol <= 0) return capped
+  const emptyRow = (): (string | number)[] =>
+    Array.from({ length: maxCol }, () => '' as string | number)
+  const out = capped.slice()
+  while (out.length < targetRows) out.push(emptyRow())
+  return out
+}
+
 function parseOneSheet(sheetName: string, sh: XLSX.WorkSheet): CmiSheetModel {
   const grid = XLSX.utils.sheet_to_json<unknown[]>(sh, {
     header: 1,
@@ -277,11 +292,10 @@ function parseOneSheet(sheetName: string, sh: XLSX.WorkSheet): CmiSheetModel {
       ? row4StripParts.join(' · ')
       : cellText(sh, HEADER_TOP, 1)
   const columnHints = buildColumnHints(grid as unknown[][], maxCol)
+  const normalized = normalizeBody(grid as unknown[][], maxCol, DATA_START)
+  const padded = padBodyRowTemplates(normalized, maxCol, MAX_CMI_BODY_ROWS)
   const bodyRows = renumberSnoColumn(
-    applyDemoBodyRows(
-      normalizeBody(grid as unknown[][], maxCol, DATA_START),
-      columnHints
-    ).slice(0, MAX_CMI_BODY_ROWS)
+    applyDemoBodyRows(padded, columnHints)
   )
 
   return {
