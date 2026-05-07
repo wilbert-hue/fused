@@ -242,6 +242,26 @@ function normalizeBody(
   return out
 }
 
+function isSerialNumberHint(hint: string): boolean {
+  const t = hint.toLowerCase().replace(/\s/g, '')
+  return t.includes('s.no') || t.includes('serialno')
+}
+
+/** After slicing rows, make S.No. column 1…n so gaps from the workbook do not show. */
+function renumberSnoColumn(
+  rows: (string | number)[][],
+  columnHints: string[]
+): (string | number)[][] {
+  if (rows.length === 0 || !isSerialNumberHint(columnHints[0] ?? '')) {
+    return rows
+  }
+  return rows.map((row, ri) => {
+    const next = row.slice()
+    if (next.length > 0) next[0] = ri + 1
+    return next
+  })
+}
+
 function parseOneSheet(sheetName: string, sh: XLSX.WorkSheet): CmiSheetModel {
   const grid = XLSX.utils.sheet_to_json<unknown[]>(sh, {
     header: 1,
@@ -264,10 +284,13 @@ function parseOneSheet(sheetName: string, sh: XLSX.WorkSheet): CmiSheetModel {
       ? row4StripParts.join(' · ')
       : cellText(sh, HEADER_TOP, 1)
   const columnHints = buildColumnHints(grid as unknown[][], maxCol)
-  const bodyRows = applyDemoBodyRows(
-    normalizeBody(grid as unknown[][], maxCol, DATA_START),
+  const bodyRows = renumberSnoColumn(
+    applyDemoBodyRows(
+      normalizeBody(grid as unknown[][], maxCol, DATA_START),
+      columnHints
+    ).slice(0, MAX_CMI_BODY_ROWS),
     columnHints
-  ).slice(0, MAX_CMI_BODY_ROWS)
+  )
 
   return {
     sheetName,
