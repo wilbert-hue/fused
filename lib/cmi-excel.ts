@@ -9,7 +9,7 @@ const HEADER_BOTTOM = 6
 const DATA_START = 7
 
 /** Max data rows per proposition sheet (after parsing / demo fill). */
-const MAX_CMI_BODY_ROWS = 40
+const MAX_CMI_BODY_ROWS = 100
 
 type Merge = { s: { r: number; c: number }; e: { r: number; c: number } }
 
