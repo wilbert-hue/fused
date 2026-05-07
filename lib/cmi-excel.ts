@@ -8,6 +8,9 @@ const HEADER_TOP = 4
 const HEADER_BOTTOM = 6
 const DATA_START = 7
 
+/** Max data rows per proposition sheet (after parsing / demo fill). */
+const MAX_CMI_BODY_ROWS = 40
+
 type Merge = { s: { r: number; c: number }; e: { r: number; c: number } }
 
 export type CmiBanner = {
@@ -264,7 +267,7 @@ function parseOneSheet(sheetName: string, sh: XLSX.WorkSheet): CmiSheetModel {
   const bodyRows = applyDemoBodyRows(
     normalizeBody(grid as unknown[][], maxCol, DATA_START),
     columnHints
-  )
+  ).slice(0, MAX_CMI_BODY_ROWS)
 
   return {
     sheetName,
